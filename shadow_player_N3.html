@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Shadowing Player N3</title>
+  <style>
+    body { font-family: sans-serif; padding: 16px; }
+    #player { width: 100%; max-width: 640px; margin: 0 auto; }
+    .controls { text-align: center; margin-top: 12px; }
+    .controls button {
+      font-size: 1.2em;
+      padding: 12px 24px;
+      margin: 0 8px;
+    }
+  </style>
+</head>
+<body>
+  <h2>シャドウイング Player（N3）</h2>
+  <div id="player"></div>
+  
+  <div class="controls">
+    <button onclick="markPlay()">▶️ Play</button>
+    <button onclick="repeatOnce()">🔁 Repeat</button>
+  </div>
+
+  <script>
+    let tag = document.createElement('script');
+    tag.src = "https://www.youtube.com/iframe_api";
+    document.body.appendChild(tag);
+
+    let player;
+    let playStart = 0;
+    let repeatEnd = 0;
+    let checkTimer;
+
+    function onYouTubeIframeAPIReady() {
+      player = new YT.Player('player', {
+        height: '360',
+        width: '100%',
+        videoId: 'X9f0o6tYXTk',
+        playerVars: {
+          'playsinline': 1
+        }
+      });
+    }
+
+    function markPlay() {
+      playStart = player.getCurrentTime();
+      player.playVideo();
+    }
+
+    function repeatOnce() {
+      repeatEnd = player.getCurrentTime();
+      player.seekTo(playStart);
+      player.playVideo();
+
+      clearInterval(checkTimer);
+      checkTimer = setInterval(() => {
+        if (player.getCurrentTime() >= repeatEnd) {
+          player.pauseVideo();
+          clearInterval(checkTimer);
+        }
+      }, 200);
+    }
+  </script>
+</body>
+</html>
