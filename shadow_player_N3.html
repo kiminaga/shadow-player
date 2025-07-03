@@ -37,7 +37,7 @@
       player = new YT.Player('player', {
         height: '360',
         width: '100%',
-        videoId: 'X9f0o6tYXTk',
+        videoId: 'X9f0o6tYXTk',  // ← N3動画のID
         playerVars: {
           'playsinline': 1
         }
@@ -51,7 +51,9 @@
 
     function repeatOnce() {
       repeatEnd = player.getCurrentTime();
-      player.seekTo(playStart);
+      // 🔁 Play位置の0.5秒前から再生（頭切れ防止）
+      let safeStart = Math.max(0, playStart - 0.5);
+      player.seekTo(safeStart);
       player.playVideo();
 
       clearInterval(checkTimer);
