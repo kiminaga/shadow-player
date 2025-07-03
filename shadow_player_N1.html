@@ -1,66 +1,75 @@
 <!DOCTYPE html>
 <html>
-<head>
-  <meta charset="UTF-8">
-  <title>Shadowing Player N1</title>
-  <style>
-    body { font-family: sans-serif; padding: 16px; }
-    #player { width: 100%; max-width: 640px; margin: 0 auto; }
-    .controls { text-align: center; margin-top: 12px; }
-    .controls button {
-      font-size: 1.2em;
-      padding: 12px 24px;
-      margin: 0 8px;
-    }
-  </style>
-</head>
-<body>
-  <h2>シャドウイング Player（N1）</h2>
-  <div id="player"></div>
-
-  <div class="controls">
-    <button onclick="markPlay()">▶️ Play</button>
+  <head>
+    <meta charset="UTF-8" />
+    <title>Shadowing Player N1</title>
+    <style>
+      body {
+        font-family: sans-serif;
+        text-align: center;
+        background: #f5f5f5;
+        margin-top: 50px;
+      }
+      button {
+        font-size: 1.2em;
+        margin: 10px;
+        padding: 10px 20px;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Shadowing Player N1</h1>
+    <div id="player"></div>
+    <br />
+    <button onclick="playVideo()">▶️ Play</button>
     <button onclick="repeatOnce()">🔁 Repeat</button>
-  </div>
 
-  <script>
-    let tag = document.createElement('script');
-    tag.src = "https://www.youtube.com/iframe_api";
-    document.body.appendChild(tag);
+    <script>
+      let player;
+      let playStartTime = 0;
+      let repeatEndTime = 0;
+      let repeatInterval;
 
-    let player;
-    let playStart = 0;
-    let repeatEnd = 0;
-    let checkTimer;
+      function onYouTubeIframeAPIReady() {
+        player = new YT.Player("player", {
+          height: "360",
+          width: "640",
+          videoId: "rgep6dyMASw", // ← N1用のYouTube ID
+          events: {
+            onReady: onPlayerReady,
+          },
+        });
+      }
 
-    function onYouTubeIframeAPIReady() {
-      player = new YT.Player('player', {
-        height: '360',
-        width: '100%',
-        videoId: 'rgep6dyMASw',  // N1動画のID
-        playerVars: { 'playsinline': 1 }
-      });
-    }
+      function onPlayerReady(event) {
+        // 初期化時に必要なら自動再生など追加可能
+      }
 
-    function markPlay() {
-      playStart = player.getCurrentTime();
-      player.playVideo();
-    }
+      function playVideo() {
+        playStartTime = player.getCurrentTime();
+        player.playVideo();
+      }
 
-    function repeatOnce() {
-      repeatEnd = player.getCurrentTime();
-      let safeStart = Math.max(0, playStart - 0.5);  // 🔁 0.5秒戻し
-      player.seekTo(safeStart);
-      player.playVideo();
+      function repeatOnce() {
+        repeatEndTime = player.getCurrentTime();
+        const safeStart = Math.max(0, playStartTime - 1.0); // ← ★ここが「1秒戻し」
 
-      clearInterval(checkTimer);
-      checkTimer = setInterval(() => {
-        if (player.getCurrentTime() >= repeatEnd) {
-          player.pauseVideo();
-          clearInterval(checkTimer);
-        }
-      }, 200);
-    }
-  </script>
-</body>
+        player.seekTo(safeStart);
+        player.playVideo();
+
+        if (repeatInterval) clearInterval(repeatInterval);
+        repeatInterval = setInterval(() => {
+          if (player.getCurrentTime() >= repeatEndTime) {
+            player.pauseVideo();
+            clearInterval(repeatInterval);
+          }
+        }, 100);
+      }
+
+      // YouTube IFrame API 読み込み
+      const tag = document.createElement("script");
+      tag.src = "https://www.youtube.com/iframe_api";
+      document.body.appendChild(tag);
+    </script>
+  </body>
 </html>
