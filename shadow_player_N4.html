@@ -22,7 +22,7 @@
       player = new YT.Player("player", {
         height: "360",
         width: "640",
-        videoId: "j0ZsUwnOgKQ",  // ← N4のYouTube動画ID（チャット履歴から）
+        videoId: "j0ZsUwnOgKQ",  // ← N4用動画ID
         playerVars: {
           rel: 0,
           modestbranding: 1
@@ -33,23 +33,26 @@
       });
     }
 
-    function onPlayerReady(event) {
+    function onPlayerReady() {
       document.getElementById("playBtn").addEventListener("click", () => {
         playStartTime = player.getCurrentTime();
         player.playVideo();
       });
 
       document.getElementById("repeatBtn").addEventListener("click", () => {
-        const currentTimeAtRepeat = player.getCurrentTime();
+        const repeatPressedTime = player.getCurrentTime();
         const repeatStart = Math.max(0, playStartTime - 2);
-        const duration = currentTimeAtRepeat - repeatStart;
+        const duration = repeatPressedTime - repeatStart;
 
-        player.seekTo(repeatStart);
-        player.playVideo();
+        player.seekTo(repeatStart, true);
 
+        // 少し待ってから再生と停止を行う（YouTubeが seek を反映するのを待つ）
         setTimeout(() => {
-          player.pauseVideo();
-        }, duration * 1000);
+          player.playVideo();
+          setTimeout(() => {
+            player.pauseVideo();
+          }, duration * 1000);
+        }, 300);  // ← ここが重要な待ち時間（調整可能）
       });
     }
   </script>
