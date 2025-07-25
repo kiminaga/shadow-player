@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Shadowing Player N4</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      text-align: center;
+      margin-top: 40px;
+      background: #f5f5f5;
+    }
+    #player {
+      margin-bottom: 20px;
+    }
+    button {
+      font-size: 1.2em;
+      padding: 10px 20px;
+      margin: 10px;
+    }
+  </style>
+</head>
+<body>
+  <h2>シャドウイング Player（N4）</h2>
+  <div id="player"></div>
+  <button id="playButton">▶️ Play</button>
+  <button id="repeatButton">🔁 Repeat</button>
+
+  <script>
+    let tag = document.createElement('script');
+    tag.src = "https://www.youtube.com/iframe_api";
+    document.body.appendChild(tag);
+
+    let player;
+    let playStartTime = 0;
+    let repeatCheckTimer;
+
+    function onYouTubeIframeAPIReady() {
+      player = new YT.Player('player', {
+        height: '360',
+        width: '640',
+        videoId: 'j0ZsUwnOgKQ',  // ← N4用のYouTube動画ID
+        playerVars: { 'playsinline': 1 },
+        events: {
+          onReady: onPlayerReady
+        }
+      });
+    }
+
+    function onPlayerReady() {
+      document.getElementById('playButton').onclick = () => {
+        playStartTime = player.getCurrentTime();
+        player.playVideo();
+      };
+
+      document.getElementById('repeatButton').onclick = () => {
+        const repeatStart = Math.max(0, playStartTime - 2.0); // ★ 2秒戻し
+        player.seekTo(repeatStart);
+        player.playVideo();
+
+        clearInterval(repeatCheckTimer);
+        repeatCheckTimer = setInterval(() => {
+          if (player.getCurrentTime() >= playStartTime) {
+            player.pauseVideo();
+            clearInterval(repeatCheckTimer);
+          }
+        }, 100);
+      };
+    }
+  </script>
+</body>
+</html>
