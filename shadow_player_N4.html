@@ -1,65 +1,57 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <meta charset="utf-8">
+  <meta charset="UTF-8">
   <title>Shadow Player N4</title>
-  <style>
-    body { font-family: sans-serif; text-align: center; margin-top: 50px; }
-    button { font-size: 1.2em; margin: 10px; padding: 10px 20px; }
-    iframe { margin-top: 30px; }
-  </style>
 </head>
 <body>
-  <h1>Shadow Player N4</h1>
-  <button id="playButton">▶ Play</button>
-  <button id="repeatButton">🔁 Repeat</button>
-
   <div id="player"></div>
+  <br>
+  <button id="playBtn">▶ Play</button>
+  <button id="repeatBtn">🔁 Repeat</button>
 
   <script>
+    let tag = document.createElement("script");
+    tag.src = "https://www.youtube.com/iframe_api";
+    document.head.appendChild(tag);
+
     let player;
     let playStartTime = 0;
-    let repeatCheckTimer;
 
     function onYouTubeIframeAPIReady() {
-      player = new YT.Player('player', {
-        height: '360',
-        width: '640',
-        videoId: 'j0ZsUwnOgKQ', // ✅ N4用のYouTube動画ID
-        playerVars: { 'playsinline': 1 },
+      player = new YT.Player("player", {
+        height: "360",
+        width: "640",
+        videoId: "j0ZsUwnOgKQ",  // ← N4のYouTube動画ID（チャット履歴から）
+        playerVars: {
+          rel: 0,
+          modestbranding: 1
+        },
         events: {
-          'onReady': onPlayerReady
+          onReady: onPlayerReady
         }
       });
     }
 
     function onPlayerReady(event) {
-      document.getElementById('playButton').onclick = () => {
+      document.getElementById("playBtn").addEventListener("click", () => {
         playStartTime = player.getCurrentTime();
         player.playVideo();
+      });
 
-        // ❌ repeatCheckTimer はここには書かない（再生が止まってしまう）
-      };
+      document.getElementById("repeatBtn").addEventListener("click", () => {
+        const currentTimeAtRepeat = player.getCurrentTime();
+        const repeatStart = Math.max(0, playStartTime - 2);
+        const duration = currentTimeAtRepeat - repeatStart;
 
-      document.getElementById('repeatButton').onclick = () => {
-        const repeatStart = Math.max(0, playStartTime - 2.0); // ✅ 2秒戻し
         player.seekTo(repeatStart);
         player.playVideo();
 
-        clearInterval(repeatCheckTimer);
-        repeatCheckTimer = setInterval(() => {
-          if (player.getCurrentTime() >= playStartTime) {
-            player.pauseVideo();
-            clearInterval(repeatCheckTimer);
-          }
-        }, 100);
-      };
+        setTimeout(() => {
+          player.pauseVideo();
+        }, duration * 1000);
+      });
     }
-
-    // YouTube APIの読み込み
-    const tag = document.createElement('script');
-    tag.src = "https://www.youtube.com/iframe_api";
-    document.head.appendChild(tag);
   </script>
 </body>
 </html>
